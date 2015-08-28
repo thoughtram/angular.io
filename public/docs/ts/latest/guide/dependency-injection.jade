@@ -50,16 +50,88 @@ include ../../../../_includes/_util-fns
 
    **[INSERT FIGURE HERE]**
 
-   
    DI in Angular basically consists of three things:
 
    - **Injector** - The injector object that exposes APIs to us to create instances of dependencies.
    - **Binding** - A binding is like a recipe that tells the injector **how** to create an instance of a depedency. A binding needs a token that maps to a factory function that creates an object.
    - **Dependency** - A binding might need it's own dependencies in order to work.
 
-   Let's take these concepts and see how they work in code. The following examples will use For simplicity-sake, we stick with our `Car` class and it's dependencies. If we'd
+   Let's take these concepts and see how they work in code. Before we use DI in an Angular 2 component, we first take a look at how the system works as a standalone module. For simplicity-sake, we stick with our `Car` class and it's dependencies.
 
-   .callout.is-helpful
-     header Note
-     p.
-       While you've used <code>template:</code> to specify an inline view, for larger templates you'd want to move them to a separate file and load them with <code>templateUrl:</code> instead.
+   **[INSERT CODE HERE]**
+
+   We import `Injector` from Angular 2 which exposes some static APIs to create injectors. `resolveAndCreate()` is basically a factory function that creates an injector and takes a list of bindings. Wait! How's that list of classes suppose to be a list of bindings? We'll explore that in a second, but for now we focus on `injector.get()`. See how we ask for an instance of `Car` in the last line? How does our injector know, which dependencies need to be created in order to instantiate a car? A look at our `Car` class will explain...
+
+   **[INSERT CODE HERE]**
+
+   We import the `Inject` decorator from the framework and apply it to our constructor parameters. Decorators have been covered in **[INSER CHAPTER LINK HERE]**.
+
+   The `Inject` decorator attaches meta data to our `Car` class, which is then consumed by the DI system afterwards. Basically what we're doing here, is that we tell the DI that the first constructor parameter should be an instance of type `Engine`, the second of type `Tires` and the third of type `Doors`. We can rewrite this code to TypeScript, which feels a bit more natural:
+
+   **[INSERT CODE HERE]**
+
+   Nice, our class declares it's own dependencies and the DI can read that information to instantiate whatever is needed to create an object of type `Car`. But how does the injector know **how** to create such an object? This is where the bindings come into play. Remember the `resolveAndCreate()` method in which we passed a list of classes?
+
+   **[INSERT CODE HERE]**
+
+   ### Injector Bindings
+
+   Again, you might wonder how this list of classes is supposed to be a list of bindings. Well, it turns out that this is actually a shorthand syntax. If we translate this to the longer, more verbose, syntax, things might become a bit more clear.
+
+   **[INSERT CODE HERE]**
+
+   We have a function `bind()` that binds a **token** to a factory function. The token can either be a type or a string. If we read those bindings now, it's much easier to understand what's happening. We bind the type `Car` to the class `Car`,  type `Engine` to the class `Engine` and so on and so forth. This is the recipe mechanism we were talking about earlier. In other words, when we ask for a dependency of type `Car` we would get an instance of class `Car` because of that binding. Bindings tell the injector which dependencies are used across the application and configure how objects of these dependencies are created.
+
+   Now the next question comes up: When do we want to use the longer instead of the shorthand syntax? There's no reason to write `bind(Foo).toClass(Foo)` if we could just stick with `Foo`, right? Yes, that's correct. That's why we started with the shorthand syntax in the first place. However, the longer syntax enables us to do something very very powerful. Let's take a look at the next code snippet.
+
+   **[INSERT CODE HERE]**
+
+   Oh! What's that? We can bind our `Engine` to another class? Yes we can. In fact, we can bind a token to pretty much whatever class we want, as long as it's a type. Here we're binding the token `Engine` to the class `OtherEngine`. Which means, when we now ask for an object of type `Engine`, we get an instance of class `OtherEngine`.
+
+   **[INSERT CODE HERE // injector.get(Engine)]**
+
+   Binding to different classes is a very powerful feature. It allows to use an "abstract" type across our application when asking for dependencies, whereas the actual type of that dependency is defined in the binding. It also solves the problem of name collisions that we have in AngularJS' DI system. In addition to that, we can swap out the actual dependency for a token in a single place without touching any other code, in case we need to refactor something.
+
+   Angular 2's DI introduces a couple of other binding recipes. Sometimes, we don't want to get an instance of a class, but rather just a single value of something or a factory function where more configuration is needed. That's why the binding mechanism of Angular 2's DI comes with more than just one recipe.
+
+   We can bind to a simple value using `.toValue()`, whis comes in handy when we want to bind to simple configuration values.
+
+   **[INSERT CODE HERE]**
+
+   We can bind an alias token to another token like this:
+
+   **[INSERT CODE HERE]**
+
+   Sometimes we need to configure how a dependency is created at runtime depending on a configuration value. This is where binding to factories comes in.
+
+   **[INSERT CODE HERE]**
+
+   Of course, a factory might have it's own dependencies. Passing dependencies to factories is as easy as adding a list of tokens to the factory:
+
+   **[INSERT CODE HERE]**
+
+   ### Optional Dependencies
+
+   The `@Optional` decorator lets us declare dependencies as optional. This comes in handy if, for example, our application expects a third-party library, and in case it's not available, it can fallback.
+
+   **[INSERT CODE HERE]**
+
+   In the code above we're asking for a dependency of type `jQuery`. This dependency is marked as optional. In case it's not available, `$` will be `null`. 
+
+   ### Transient Dependencies and Child Injectors
+
+   If we need a transient dependency, something that we want a new instance every time we ask for a dependency, we have two options:
+
+   **Factories** can return instances of classes. Those won't be singletons.
+
+   **[INSERT CODE HERE]**
+
+   We can create a **child injector** using `Injector.resolveAndCreateChild()`. A child injector introduces it's own bindings and an instance of an object will be different from the parent injector's instance.
+
+   **[INSERT CODE HERE]**
+
+   Child injectors are even more interesting. It turns out that a child injector will look up a token binding on it's parent injector if no binding for the given token is registered on the child injector. The following graphic visualises what happens:
+
+   **[INSERT FIGURE HERE]**
+
+   The graphic shows three injectors where two of them are child injectors. Each injector gets it's own configuration of bindings. Now, if we ask the second child injector for an instance of type `Car`, the car object will be created by that child injector. However, the engine will be created by the first child injector and the tires and doors will be created by the outer most parent injector. It kind of works like a prototype chain.
