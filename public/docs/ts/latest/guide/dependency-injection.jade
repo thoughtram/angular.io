@@ -135,3 +135,31 @@ include ../../../../_includes/_util-fns
    **[INSERT FIGURE HERE]**
 
    The graphic shows three injectors where two of them are child injectors. Each injector gets it's own configuration of bindings. Now, if we ask the second child injector for an instance of type `Car`, the car object will be created by that child injector. However, the engine will be created by the first child injector and the tires and doors will be created by the outer most parent injector. It kind of works like a prototype chain.
+
+   ### DI in Angular Components
+
+   Now that we've learned how the DI in Angular 2 works, you might wonder how it is used in the framework itself. Do we have to create injectors manually when we build Angular 2 components? Luckily not. Angular components have a nice API that hides all the injector machinery for us.
+
+   Lets take a look at the following simple Angular 2 component.
+
+   **[INSERT CODE HERE]**
+
+   Nothing special here. Lets say we want to extend this component by using a `NameService` that is used in the component's constructor. Such a service could look something like this:
+
+   **[INSERT CODE HERE]**
+
+   Again, nothing special here. We just create a class. How do we get this service into our component? It turns out that every component in Angular creates it's own injector. If you think of your application as a component tree, we basically also have an injector tree. What we need to do now, is to pass bindings to our component's injector, so it knows about the `NameService` type. The `@Component` annotation comes with configuration that has a `binding` property. Here's how we can use it:
+   
+   **[INSERT CODE HERE]**
+   
+   This looks familiar, right? `bindings` is really just a collection of bindings that is used to configure our component's injector. Now, to actually inject a dependency of type `NameService`, we just use the tools we've already learned - `@Inject` decorators.
+
+   **[INSERT CODE HERE]**
+
+   In fact, in TypeScript we can just add type annotations to our constructor:
+
+   **[INSERT CODE HERE]**
+
+   TypeScript will then create the meta data, that is needed for DI, for us.
+
+   Cool, **we learned how to use DI in Angular 2**! 
