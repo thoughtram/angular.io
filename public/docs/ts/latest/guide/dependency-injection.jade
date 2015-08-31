@@ -21,12 +21,14 @@ include ../../../../_includes/_util-fns
 
    How can we write this code better and make it more testable? Turns out this is super easy and you probably already know what to do. We change our code to this:
 
-   **[INSERT CODE HERE]**
+  +makeExample('dependency-injection', 'ts/loosely-coupled-car.ts')
 
+  :markdown
    All we did is we moved the dependency creation out of the constructor and extended the constructor function to expect all needed dependencies. There are no concrete implementations anymore in this code, we literally moved the responsibility of creating those dependencies to a higher level. If we now want to create a car object, all we have to do is to pass all needed dependencies to the constructor:
 
-   **[INSERT CODE HERE]**
+  +makeExample('dependency-injection', 'ts/instantiate-loosely-coupled-car.ts')
 
+  :markdown
    How cool is that? The dependencies are now decoupled from our class, which allows us to pass in mocked dependencies in case we're writing tests:
 
    **[INSERT CODE HERE]**
