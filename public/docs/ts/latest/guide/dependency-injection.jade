@@ -12,8 +12,9 @@ include ../../../../_includes/_util-fns
 
    Let's start by taking a look at the following code and analysing the problems it introduces.
 
-   **[INSERT CODE HERE]**
+  +makeExample('dependency-injection', 'ts/tightly-coupled-car.ts')
 
+  :markdown
    Nothing special here. We have a class `Car` that has a constructor in which we set up everything we need in order to construct a car object once needed. What's the problem with this code? Well, as you can see, the constructor not only assigns needed dependencies to internal properties, it also knows how those object are created. For example the engine object is created using the `Engine` constructor, `Tires` seems to be a singleton interface and the doors are requested via a global object.
 
    This leads to code that is hard to maintain and even harder to test. Just imagine we'd like to test this class. How would we replace `Engine` with a `MockEngine` dependency in that code? When writing tests, we want to test different scenarios that our code is used in, hence each scenario needs it's own configuration. If we want to write testable code, we need to write reusable code that works in any environment as long as all dependencies are satisfied. Which brings us to the conclusion that **testable code is reusable code** and vise versa.
@@ -30,7 +31,7 @@ include ../../../../_includes/_util-fns
 
    **[INSERT CODE HERE]**
 
-   Believe or not, but **we just learned what Dependency Injection is**. It's really just a pattern that describes that needed dependencies of an entity should either be passed to it's constructor, or to dedicated setter methods of that entity. 
+   Believe or not, but **we just learned what Dependency Injection is**. It's really just a pattern that describes that needed dependencies of an entity should either be passed to it's constructor, or to dedicated setter methods of that entity.
 
    Okay cool, now we know what DI is and how to use it, but when comes a "DI as a framework" into play? As mentioned before, we literally moved the responsibility of dependency creation to a higher level. This is exactly what our new problem is. Who takes care of assembling all those dependencies for us? Well... It's us.
 
@@ -41,7 +42,7 @@ include ../../../../_includes/_util-fns
    **[INSERT CODE HERE]**
 
    In this code, we don't have to know what dependencies are needed to create an object of type `Car`. We just create an injector that figures out how to do that. This is what **Dependency Injection as a framework** is all about. No `main` method required where we have to assemble all of our dependencies ourselves. We have an injector that takes care of that.
-   
+
    Now that we have a proper understanding of what Dependency Injection is, let's take a look at how that's implemented in Angular.
 
    ## Dependency Injection in Angular 2
@@ -116,7 +117,7 @@ include ../../../../_includes/_util-fns
 
    **[INSERT CODE HERE]**
 
-   In the code above we're asking for a dependency of type `jQuery`. This dependency is marked as optional. In case it's not available, `$` will be `null`. 
+   In the code above we're asking for a dependency of type `jQuery`. This dependency is marked as optional. In case it's not available, `$` will be `null`.
 
    ### Transient Dependencies and Child Injectors
 
@@ -149,9 +150,9 @@ include ../../../../_includes/_util-fns
    **[INSERT CODE HERE]**
 
    Again, nothing special here. We just create a class. How do we get this service into our component? It turns out that every component in Angular creates it's own injector. If you think of your application as a component tree, we basically also have an injector tree. What we need to do now, is to pass bindings to our component's injector, so it knows about the `NameService` type. The `@Component` annotation comes with configuration that has a `binding` property. Here's how we can use it:
-   
+
    **[INSERT CODE HERE]**
-   
+
    This looks familiar, right? `bindings` is really just a collection of bindings that is used to configure our component's injector. Now, to actually inject a dependency of type `NameService`, we just use the tools we've already learned - `@Inject` decorators.
 
    **[INSERT CODE HERE]**
@@ -162,4 +163,4 @@ include ../../../../_includes/_util-fns
 
    TypeScript will then create the meta data, that is needed for DI, for us.
 
-   Cool, **we learned how to use DI in Angular 2**! 
+   Cool, **we learned how to use DI in Angular 2**!
