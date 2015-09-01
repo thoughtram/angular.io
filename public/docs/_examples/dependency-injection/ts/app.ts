@@ -1,17 +1,12 @@
 // #docregion
 // #docregion import
 import {Component, View, bootstrap} from 'angular2/angular2';
+import {NameService} from './nameService';
 
 // Why doesn't the component work when I import the service
 // rather than defining it in the same file
 //import * as NameService from './nameService';
 // #enddocregion
-
-class NameService {
-  getName () {
-    return "Angular 2";
-  }
-}
 
 // #docregion class-w-annotations
 @Component({
