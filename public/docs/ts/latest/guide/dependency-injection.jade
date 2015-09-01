@@ -6,7 +6,7 @@ include ../../../../_includes/_util-fns
   :markdown
     Dependency injection has always been one of Angular's biggest features. It allows us to inject dependencies in different components across our applications, without needing to know, how those dependencies are created, or what dependencies they need themselves. In this chapter we're going to explore the dependency injection system that comes with the Angular framework.
 
-    ## Understanding Dependency Injection
+    ## Why Dependency Injection?
 
     Before we take a look at what Angular's implementation of dependency injection looks like, we first need to understand what it is and why we want this feature at all. Dependency Injection can be interpreted in two different ways. One way is to treat it as a **design pattern**, the other one is to treat it as a framework. Whereas the former explains the pattern that DI is all about, the latter can be a system that helps us out maintaining and assembling dependencies.
 
@@ -167,18 +167,35 @@ include ../../../../_includes/_util-fns
 
     Cool, **we learned how to use DI in Angular 2**!
 
-  figure.image-display
-    img(src='/resources/images/examples/setup-example1.png' alt="Example of Todo App")
+    ## Advanced Dependency Injection
 
-  :markdown
-    ```json
-    {
-        "compilerOptions": {
-            "target": "ES5",
-            "module": "commonjs",
-            "sourceMap": true,
-            "emitDecoratorMetadata": true,
-            "experimentalDecorators": true
-        }
-    }
-    ```
+    Even though we learned that Angular 2's new dependency injection is very flexible, there are still a couple of topics that we haven't discussed yet. One of them is how Angular treats the relationship between **host** and child injectors, and the other one is how the **visibility of dependencies** are handled.
+
+    ### Understanding host relationships
+
+    Host and visibility are both features in Angular 2's dependency injection system, that are very specific to Angular. For now just keep in mind that we probably don't need any of these features when using Angular 2's DI not in the context of Angular itself. However, once we understood the context and why this feature exist, we'll also take a look at how this is implemented under the hood, so we all know what's going on.
+
+    Let's start off by imagining the following scenario. We have three nested components that all do their own thing (because that's what components do in Angular 2):
+
+    **[INSERT CODE HERE]**
+
+    As we learned earlier, each component in Angular creates it's own injector. Which means the code above can be translated to something like this:
+    **[INSERT CODE HERE]**
+
+    To come back to our nice and cozy JavaScript world, we could also translate it to this:
+
+    **[INSERT CODE HERE]**
+
+    Of course, this code is very simplified and as we can see, there are also no bindings passed to any of the injectors, which is usually the case. Let's add some actual bindings, to see how the relationships between the injectors affect dependency instantiation.
+
+    **[INSERT CODE HERE]**
+
+    The injector tree allows us to define injector bindings for a specific component and it's children. With the code above, if we ask `grandChild` for a dependency of type `Car` we'll get back an instance of type `Convertible`, because it defines it's own binding for that type. However, if we ask for a dependency of type `Engine`, we simply get an instance of the class `Engine`, because `grandChild` will ask it's parent injector (recursively) until an injector has bindings defined for that type.
+
+    Okay, this sounds all very powerful but where does this host thing come into play? Let's get back to the original code with our three nested components. `<component-two>` and `<component-three>` are both children of `<component-one>`. However, we don't know yet what's inside of our components themselves. In Angular 2, a component always has a view.
+
+    **Okay, but how is that related to DI?**
+
+    That's a good question! We've now seen a couple of times that an injector is always looking up a dependency on it's parent injector in case it doesn't have bindings for the requested type. That parent injector does pretty much the same until we finally get our dependency. When we think in components, that means that a component's injector will lookup up a dependency even across boundaries.
+
+    [TODO]
